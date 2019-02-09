@@ -11,7 +11,21 @@ class NQueens:
         self.size = size
         self.positions = self.initializePositions(size)
         self.show_full_board(self.positions)
+        self.solve()
+        self.show_full_board(self.positions)
 
+    def solve(self):
+        while self.totalConflicts > 0:
+            for column in range(len(self.positions)):
+                if self.totalConflicts <= 0:
+                    break
+                row = self.positions[column]
+                numConflicts = self.numConflicts(row,column,self.positions)
+                rowToPut, minConflicts = self.minConflicts(column,self.positions)
+                # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
+                self.totalConflicts += (minConflicts-numConflicts)
+                self.positions[column] = rowToPut
+    
     def initializePositions(self,size):
         board = [None] * size
         for column in range(size):
@@ -80,9 +94,7 @@ def readText(fname):
 
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    queen = NQueens(16)
 
-    # for size in sizes:
-    #     queen = NQueens(size)
-    # queen = NQueens(4)
-    # queen.show_full_board
+    for size in sizes:
+        queen = NQueens(size)
+    
