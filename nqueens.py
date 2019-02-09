@@ -9,7 +9,8 @@ class NQueens:
         # Store the puzzle (problem) size and the number of valid solutions
         self.size = size
         self.positions = self.initializePositions(size)
-        self.show_full_board(self.positions)
+        self.optimize()
+        # self.showFullBoard(self.positions)
     
     def initializePositions(self,size):
         board = [None] * size
@@ -18,11 +19,15 @@ class NQueens:
             board[column] = rowToPut
         return board
 
+    def optimize(self):
+        self.showFullBoard(self.positions)
+
+
     def minConflicts(self,column,positions):
         return random.randint(0,len(positions))
             
     
-    def show_full_board(self, positions):
+    def showFullBoard(self, positions):
         """Show the full NxN board"""
         for row in range(self.size):
             line = ""
@@ -46,9 +51,6 @@ def readText(fname):
 
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    NQueens(16)
-    # for size in sizes:
-    #     queen = NQueens(size)
-    # queen = NQueens(4)
-    # queen.show_full_board
+    for size in sizes:
+        queen = NQueens(size)
 
