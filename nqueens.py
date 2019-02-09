@@ -10,18 +10,43 @@ class NQueens:
         self.size = size
         self.positions = self.initializePositions(size)
         self.show_full_board(self.positions)
-    
+
     def initializePositions(self,size):
         board = [None] * size
         for column in range(size):
-            rowToPut = self.minConflicts(column,board) # See if we can put the queen along the diagonal
+            rowToPut, numConflicts = self.minConflicts(column,board) # See if we can put the queen along the diagonal
             board[column] = rowToPut
         return board
 
-    def minConflicts(self,column,positions):
-        return random.randint(0,len(positions))
-            
-    
+    def minConflicts(self,col,positions):
+        minn = float('inf')
+        bestRow = -1
+        for row in range(len(positions)):
+            conflicts = self.numConflicts(row, col, positions)
+            if conflicts < minn:
+                minn = conflicts
+                bestRow = row
+        return bestRow, minn
+
+    # col is the column for the queen of interest
+    # row is the potential new row to move the queen to
+    def numConflicts(self, row, col, positions):
+        total = 0
+        queenPos = positions[col]
+        for ind in range(len(positions)):
+            if ind != col:
+                otherQueen = positions[ind]
+                if otherQueen == None:
+                    return total
+                elif row == otherQueen: # same row
+                    total += 1
+                elif row+col == otherQueen+ind: # same diag
+                    total += 1
+                elif row-col == otherQueen-ind: # same diag
+                    total += 1
+        return total
+
+
     def show_full_board(self, positions):
         """Show the full NxN board"""
         for row in range(self.size):
@@ -29,7 +54,7 @@ class NQueens:
             for column in range(self.size):
                 if positions[column] == row:
                     line += "Q "
-                else: 
+                else:
                     line+=". "
             print(line)
         print("\n")
@@ -38,7 +63,7 @@ class NQueens:
 def readText(fname):
     with open(fname) as f:
         content = f.readlines()
-    content = [int(x.strip()) for x in content] 
+    content = [int(x.strip()) for x in content]
     return content
 
 
@@ -46,9 +71,8 @@ def readText(fname):
 
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    NQueens(16)
+    NQueens(32)
     # for size in sizes:
     #     queen = NQueens(size)
     # queen = NQueens(4)
     # queen.show_full_board
-
