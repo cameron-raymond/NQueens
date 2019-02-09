@@ -7,6 +7,7 @@ class NQueens:
 
     def __init__(self, size):
         # Store the puzzle (problem) size and the number of valid solutions
+        self.totalConflicts = 0
         self.size = size
         self.positions = self.initializePositions(size)
         self.show_full_board(self.positions)
@@ -16,6 +17,7 @@ class NQueens:
         for column in range(size):
             rowToPut, numConflicts = self.minConflicts(column,board) # See if we can put the queen along the diagonal
             board[column] = rowToPut
+            self.totalConflicts += numConflicts
         return board
 
     def minConflicts(self,col,positions):
@@ -23,6 +25,12 @@ class NQueens:
         bestRow = -1
         for row in range(len(positions)):
             conflicts = self.numConflicts(row, col, positions)
+            # If moving a queen to a new row results in the same amount of conflicts, we'll do so 1 in n times (where n is the size of the chessboard )
+            # this reduces the importance of the initial placings and helps avoid local minima
+            if conflicts == minn:                       
+                if random.randint(0,self.size) == 0: 
+                    minn = conflicts
+                    bestRow = row
             if conflicts < minn:
                 minn = conflicts
                 bestRow = row
@@ -57,6 +65,7 @@ class NQueens:
                 else:
                     line+=". "
             print(line)
+        print("Total conflicts: "+str(self.totalConflicts))
         print("\n")
 
 
@@ -71,7 +80,8 @@ def readText(fname):
 
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    NQueens(32)
+    queen = NQueens(16)
+
     # for size in sizes:
     #     queen = NQueens(size)
     # queen = NQueens(4)
