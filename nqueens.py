@@ -28,7 +28,7 @@ class NQueens:
             # If moving a queen to a new row results in the same amount of conflicts, we'll do so 1 in n times (where n is the size of the chessboard )
             # this reduces the importance of the initial placings and helps avoid local minima
             if conflicts == minn:                       
-                if random.randint(0,self.size) == 0: 
+                if random.randint(0,self.size) == 0: # Originally this was a random int between 0 and 1 but this meant that large chess boards would favour lower rows
                     minn = conflicts
                     bestRow = row
             if conflicts < minn:
