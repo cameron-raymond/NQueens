@@ -2,18 +2,16 @@ import random
 
 """The n queens puzzle"""
 
-
 class NQueens:
     """Generate all valid solutions for the n queens puzzle"""
-
     def __init__(self, size):
         # Store the puzzle (problem) size and the number of valid solutions
+        print("Size:  "+str(size)+" initializing positions")
         self.totalConflicts = 0
         self.size = size
         self.positions = self.initializePositions(size)
-        self.show_full_board(self.positions)
         self.solve()
-        self.show_full_board(self.positions)
+        print("Solved")
 
     def solve(self):
         i = 0
@@ -94,19 +92,16 @@ class NQueens:
         print("Total conflicts: "+str(self.totalConflicts))
         print("\n")
 
-
 def readText(fname):
     with open(fname) as f:
         content = f.readlines()
     content = [int(x.strip()) for x in content]
     return content
 
-
-
-
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    queen = NQueens(30)
-    # for size in sizes:
-    #     queen = NQueens(size)
+    start = time.time()
+    queen = NQueens(300)
+    end = time.time()
+    print("Time elapsed: "+str(end - start))
     
