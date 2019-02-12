@@ -23,7 +23,7 @@ class NQueens:
                 if self.totalConflicts <= 0:
                     break
                 row = self.positions[column]
-                rowToPut, minConflicts, change = self.minConflicts(row,column,self.positions)
+                rowToPut, minConflicts, change = self.minConflicts(column,self.positions)
                 # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
                 self.totalConflicts += change
                 self.positions[column] = rowToPut
@@ -34,15 +34,21 @@ class NQueens:
     def initializePositions(self,size):
         board = [None] * size
         for column in range(size):
-            rowToPut, numConflicts = self.minConflicts(None,column,board) # See if we can put the queen along the diagonal
+            rowToPut, numConflicts = self.minConflicts(column,board) # See if we can put the queen along the diagonal
             board[column] = rowToPut
             self.totalConflicts += numConflicts
         return board
 
-    def minConflicts(self,initRow,col,positions):
+    def minConflicts(self,col,positions):
+        """
+            Takes in the column the queen is on, as well as the posititons of the queen's on the rest of the board,
+            returns the best row the Queen can move to, the number of conflicts that the queen has moved into, and the difference in conflicts
+            before and after the move
+        """
         minn = float('inf')
         bestRow = -1
         beforeConflicts = None
+        initRow = positions[col]
         for row in range(len(positions)):                
             conflicts = self.numConflicts(row, col, positions)
             if initRow != None and row == initRow:
@@ -66,20 +72,14 @@ class NQueens:
     def numConflicts(self, row, col, positions):
         total = 0
         queenPos = positions[col]
-        nextColumn = (col+1)%self.size
         for ind in range(len(positions)):
             if ind != col:
                 otherQueen = positions[ind]
                 if otherQueen == None:
                     return total
                 elif row == otherQueen or row+col == otherQueen+ind or row-col == otherQueen-ind:  # if it's in the same row or diagnol, don't need to check columns because we only place on queen per column
-                    if random.randint(0,self.size) == 0: # Originally this was a random int between 0 and 1 but this meant that large chess boards would favour farther columns
-                        nextColumn = ind
                     total += 1
-        # print("When moving the queen from "+str(row)+","+str(col) +" the next column we'd move to is "+str(nextColumn)+" which has "+str(total)+" conflicts")
-
         return total
-
 
     def show_full_board(self, positions):
         """Show the full NxN board"""
@@ -106,7 +106,7 @@ def readText(fname):
 
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    queen = NQueens(1000)
+    queen = NQueens(30)
     # for size in sizes:
     #     queen = NQueens(size)
     
