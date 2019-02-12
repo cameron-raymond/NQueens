@@ -16,7 +16,9 @@ class NQueens:
         self.show_full_board(self.positions)
 
     def solve(self):
+        i = 0
         while self.totalConflicts > 0:
+            conflictsB = self.totalConflicts
             for column in range(len(self.positions)):
                 if self.totalConflicts <= 0:
                     break
@@ -25,6 +27,9 @@ class NQueens:
                 # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
                 self.totalConflicts += change
                 self.positions[column] = rowToPut
+            conflictsA = self.totalConflicts
+            i+=1
+            print("Pass "+str(i)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(conflictsB-conflictsA))
     
     def initializePositions(self,size):
         board = [None] * size
@@ -101,7 +106,7 @@ def readText(fname):
 
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    queen = NQueens(8)
+    queen = NQueens(1000)
     # for size in sizes:
     #     queen = NQueens(size)
     
