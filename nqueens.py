@@ -1,5 +1,4 @@
 import random
-import time
 
 """The n queens puzzle"""
 
@@ -15,23 +14,20 @@ class NQueens:
         print("Solved")
 
     def solve(self):
-        i = 1
+        i = 0
         while self.totalConflicts > 0:
-            start = time.time()
+            conflictsB = self.totalConflicts
             for column in range(len(self.positions)):
                 if self.totalConflicts <= 0:
                     break
                 row = self.positions[column]
-                numConflicts = self.numConflicts(row,column,self.positions)
-                rowToPut, minConflicts = self.minConflicts(column,self.positions)
-                self.totalConflicts += (minConflicts-numConflicts)
+                rowToPut, minConflicts, change = self.minConflicts(column,self.positions)
+                # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
+                self.totalConflicts += change
                 self.positions[column] = rowToPut
-            end = time.time()
-            print("Pass "+str(i)+" - duration: "+str(end - start)+", total number of conflicts " + str(self.totalConflicts))
-            # self.show_full_board(self.positions)
-
+            conflictsA = self.totalConflicts
             i+=1
-        self.show_full_board(self.positions)
+            print("Pass "+str(i)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(conflictsB-conflictsA))
     
     def initializePositions(self,size):
         board = [None] * size
@@ -42,10 +38,19 @@ class NQueens:
         return board
 
     def minConflicts(self,col,positions):
+        """
+            Takes in the column the queen is on, as well as the posititons of the queen's on the rest of the board,
+            returns the best row the Queen can move to, the number of conflicts that the queen has moved into, and the difference in conflicts
+            before and after the move
+        """
         minn = float('inf')
         bestRow = -1
-        for row in range(len(positions)):
+        beforeConflicts = None
+        initRow = positions[col]
+        for row in range(len(positions)):                
             conflicts = self.numConflicts(row, col, positions)
+            if initRow != None and row == initRow:
+                beforeConflicts = conflicts
             # If moving a queen to a new row results in the same amount of conflicts, we'll do so 1 in n times (where n is the size of the chessboard )
             # this reduces the importance of the initial placings and helps avoid local minima
             if conflicts == minn:                       
@@ -55,7 +60,10 @@ class NQueens:
             if conflicts < minn:
                 minn = conflicts
                 bestRow = row
-        return bestRow, minn
+        if beforeConflicts == None:
+            return bestRow, minn
+        changeInConflicts = (minn-beforeConflicts)
+        return (bestRow, minn, changeInConflicts)
 
     # col is the column for the queen of interest
     # row is the potential new row to move the queen to
@@ -67,11 +75,7 @@ class NQueens:
                 otherQueen = positions[ind]
                 if otherQueen == None:
                     return total
-                elif row == otherQueen: # same row
-                    total += 1
-                elif row+col == otherQueen+ind: # same diag
-                    total += 1
-                elif row-col == otherQueen-ind: # same diag
+                elif row == otherQueen or row+col == otherQueen+ind or row-col == otherQueen-ind:  # if it's in the same row or diagnol, don't need to check columns because we only place on queen per column
                     total += 1
         return total
 
