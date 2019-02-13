@@ -1,22 +1,17 @@
 import random
 import time
-
-
-"""The n queens puzzle"""
-
 """The n queens puzzle"""
 
 class NQueens:
     """Generate all valid solutions for the n queens puzzle"""
     def __init__(self, size, beta=False):
         # Store the puzzle (problem) size and the number of valid solutions
-        # print("Size:  "+str(size)+" initializing positions")
         self.totalConflicts = 0
         self.size = size
         self.beta = beta
         self.positions = self.initializePositions(size)
+        # self.show_full_board(self.positions)
         self.solve()
-        # print("Solved")
 
     def solve(self):
         iteration = 0
@@ -25,12 +20,14 @@ class NQueens:
             for column in range(len(self.positions)):
                 if self.totalConflicts <= 0:
                     break
+
                 row = self.positions[column]
                 rowToPut, minConflicts, change = self.minConflicts(column, self.positions)
                 # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
                 self.totalConflicts += change
                 self.positions[column] = rowToPut
             conflictsA = self.totalConflicts
+
             iteration+=1
             improvement = conflictsB-conflictsA
             # print("Pass "+str(iteration)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(improvement))
@@ -72,13 +69,12 @@ class NQueens:
                 bestRow = row
 
         changeInConflicts = (minn-beforeConflicts)
-        return (bestRow, minn, changeInConflicts)
+        return bestRow, minn, changeInConflicts
 
     # col is the column for the queen of interest
     # row is the potential new row to move the queen to
     def numConflicts(self, row, col, positions):
         total = 0
-        queenPos = positions[col]
         for ind in range(len(positions)):
             if ind != col:
                 otherQueen = positions[ind]
