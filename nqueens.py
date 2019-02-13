@@ -1,5 +1,4 @@
 import random
-
 """The n queens puzzle"""
 
 
@@ -8,12 +7,16 @@ class NQueens:
 
     def __init__(self, size):
         # Store the puzzle (problem) size and the number of valid solutions
+        print("SOLVING SIZE"+str(size))
+
         self.totalConflicts = 0
         self.size = size
         self.positions = self.initializePositions(size)
-        self.show_full_board(self.positions)
+        # self.show_full_board(self.positions)
         self.solve()
-        self.show_full_board(self.positions)
+        # self.show_full_board(self.positions)
+        print("SOLVED SIZE OF "+str(size))
+        print("\n\n")
 
     def solve(self):
         i = 0
@@ -22,14 +25,14 @@ class NQueens:
             for column in range(len(self.positions)):
                 if self.totalConflicts <= 0:
                     break
-                row = self.positions[column]
                 rowToPut, minConflicts, change = self.minConflicts(column,self.positions)
                 # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
                 self.totalConflicts += change
                 self.positions[column] = rowToPut
             conflictsA = self.totalConflicts
             i+=1
-            print("Pass "+str(i)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(conflictsB-conflictsA))
+            self.show_full_board(self.positions)
+            # print("Pass "+str(i)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(conflictsB-conflictsA))
     
     def initializePositions(self,size):
         board = [None] * size
@@ -65,13 +68,12 @@ class NQueens:
         if beforeConflicts == None:
             return bestRow, minn
         changeInConflicts = (minn-beforeConflicts)
-        return (bestRow, minn, changeInConflicts)
+        return bestRow, minn, changeInConflicts
 
     # col is the column for the queen of interest
     # row is the potential new row to move the queen to
     def numConflicts(self, row, col, positions):
         total = 0
-        queenPos = positions[col]
         for ind in range(len(positions)):
             if ind != col:
                 otherQueen = positions[ind]
@@ -94,19 +96,15 @@ class NQueens:
         print("Total conflicts: "+str(self.totalConflicts))
         print("\n")
 
-
 def readText(fname):
     with open(fname) as f:
         content = f.readlines()
     content = [int(x.strip()) for x in content]
     return content
 
-
-
-
 if __name__ == '__main__':
     sizes = readText('./nqueens.txt')
-    queen = NQueens(30)
+    queen = NQueens(100)
     # for size in sizes:
     #     queen = NQueens(size)
     
