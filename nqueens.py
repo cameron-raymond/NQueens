@@ -1,38 +1,47 @@
 import random
+import time
+
+
+"""The n queens puzzle"""
 
 """The n queens puzzle"""
 
 class NQueens:
     """Generate all valid solutions for the n queens puzzle"""
-    def __init__(self, size):
+    def __init__(self, size, beta=False):
         # Store the puzzle (problem) size and the number of valid solutions
-        print("Size:  "+str(size)+" initializing positions")
+        # print("Size:  "+str(size)+" initializing positions")
         self.totalConflicts = 0
         self.size = size
+        self.beta = beta
         self.positions = self.initializePositions(size)
         self.solve()
-        print("Solved")
+        # print("Solved")
 
     def solve(self):
-        i = 0
+        iteration = 0
         while self.totalConflicts > 0:
             conflictsB = self.totalConflicts
             for column in range(len(self.positions)):
                 if self.totalConflicts <= 0:
                     break
                 row = self.positions[column]
-                rowToPut, minConflicts, change = self.minConflicts(column,self.positions)
+                rowToPut, minConflicts, change = self.minConflicts(column, self.positions)
                 # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
                 self.totalConflicts += change
                 self.positions[column] = rowToPut
             conflictsA = self.totalConflicts
-            i+=1
-            print("Pass "+str(i)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(conflictsB-conflictsA))
-    
+            iteration+=1
+            improvement = conflictsB-conflictsA
+            # print("Pass "+str(iteration)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(improvement))
+
+        if self.totalConflicts > 0:
+            print("Unable to solve problem")
+
     def initializePositions(self,size):
         board = [None] * size
         for column in range(size):
-            rowToPut, numConflicts = self.minConflicts(column,board) # See if we can put the queen along the diagonal
+            rowToPut, numConflicts, _ = self.minConflicts(column,board) # See if we can put the queen along the diagonal
             board[column] = rowToPut
             self.totalConflicts += numConflicts
         return board
@@ -45,23 +54,23 @@ class NQueens:
         """
         minn = float('inf')
         bestRow = -1
-        beforeConflicts = None
         initRow = positions[col]
-        for row in range(len(positions)):                
+        beforeConflicts = self.numConflicts(initRow, col, positions) if positions[col] is not None else float('inf')
+
+        for row in range(len(positions)):
             conflicts = self.numConflicts(row, col, positions)
-            if initRow != None and row == initRow:
-                beforeConflicts = conflicts
+
             # If moving a queen to a new row results in the same amount of conflicts, we'll do so 1 in n times (where n is the size of the chessboard )
             # this reduces the importance of the initial placings and helps avoid local minima
-            if conflicts == minn:                       
-                if random.randint(0,self.size) == 0: # Originally this was a random int between 0 and 1 but this meant that large chess boards would favour lower rows
-                    minn = conflicts
-                    bestRow = row
+
             if conflicts < minn:
                 minn = conflicts
                 bestRow = row
-        if beforeConflicts == None:
-            return bestRow, minn
+
+            elif conflicts == minn and (bestRow == initRow or random.randint(0, self.size) == 0): # Originally this was a random int between 0 and 1 but this meant that large chess boards would favour lower rows
+                minn = conflicts
+                bestRow = row
+
         changeInConflicts = (minn-beforeConflicts)
         return (bestRow, minn, changeInConflicts)
 
@@ -98,10 +107,48 @@ def readText(fname):
     content = [int(x.strip()) for x in content]
     return content
 
+
+def test():
+    timesShort = []
+    timesMedium = []
+    timesLong = []
+
+    betaTimesShort = []
+    betaTimesMedium = []
+    betaTimesLong = []
+
+    count = 0
+    while count < 100:
+        count+=1
+        start = time.time()
+        queen = NQueens(64)
+        timesShort.append(time.time() - start)
+
+        start = time.time()
+        queen = NQueens(120)
+        timesMedium.append(time.time() - start)
+        start = time.time()
+        queen = NQueens(150)
+        timesLong.append(time.time() - start)
+
+        start = time.time()
+        queen = NQueens(64, True)
+        betaTimesShort.append(time.time() - start)
+        start = time.time()
+        queen = NQueens(120, True)
+        betaTimesMedium.append(time.time() - start)
+        start = time.time()
+        queen = NQueens(150, True)
+        betaTimesLong.append(time.time() - start)
+
+        print("---")
+        print(sum(timesShort)/len(timesShort), "avg for timesShort")
+        print(sum(timesMedium)/len(timesMedium), "avg for timesMedium")
+        print(sum(timesLong)/len(timesLong), "avg for timesLong")
+        print()
+        print(sum(betaTimesShort)/len(betaTimesShort), "avg for betaTimesShort")
+        print(sum(betaTimesMedium)/len(betaTimesMedium), "avg for betaTimesMedium")
+        print(sum(betaTimesLong)/len(betaTimesLong), "avg for betaTimesLong")
+
 if __name__ == '__main__':
-    sizes = readText('./nqueens.txt')
-    start = time.time()
-    queen = NQueens(300)
-    end = time.time()
-    print("Time elapsed: "+str(end - start))
-    
+    test()
