@@ -53,7 +53,6 @@ class NQueens:
         minn = float('inf')
         bestRow = -1
         initRow = positions[col]
-        beforeConflicts = self.numConflicts(initRow, col, positions) if positions[col] is not None else float('inf')
 
         candidates = []
         colCon = self.colConflicts(col, positions)
@@ -67,6 +66,7 @@ class NQueens:
             else:
                 candidates.append(row)
         choice = random.choice(candidates)
+        beforeConflicts = colCon[initRow] if initRow is not None else float('inf')
         changeInConflicts = (minn-beforeConflicts)
         return choice, minn, changeInConflicts
 
