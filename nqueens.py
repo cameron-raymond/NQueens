@@ -1,5 +1,6 @@
 import random
 import time
+import cProfile
 """The n queens puzzle"""
 
 class NQueens:
@@ -54,22 +55,34 @@ class NQueens:
         initRow = positions[col]
         beforeConflicts = self.numConflicts(initRow, col, positions) if positions[col] is not None else float('inf')
 
-        for row in range(len(positions)):
-            conflicts = self.numConflicts(row, col, positions)
-
-            # If moving a queen to a new row results in the same amount of conflicts, we'll do so 1 in n times (where n is the size of the chessboard )
-            # this reduces the importance of the initial placings and helps avoid local minima
-
-            if conflicts < minn:
-                minn = conflicts
-                bestRow = row
-
-            elif conflicts == minn and (bestRow == initRow or random.randint(0, self.size) == 0): # Originally this was a random int between 0 and 1 but this meant that large chess boards would favour lower rows
-                minn = conflicts
-                bestRow = row
-
+        candidates = []
+        colCon = self.colConflicts(col, positions)
+        for row in range(len(colCon)):
+            rowCons = colCon[row]
+            if rowCons > minn:
+                pass
+            elif rowCons < minn:
+                minn = rowCons
+                candidates = [row]
+            else:
+                candidates.append(row)
+        choice = random.choice(candidates)
         changeInConflicts = (minn-beforeConflicts)
-        return bestRow, minn, changeInConflicts
+        return choice, minn, changeInConflicts
+
+    def colConflicts(self, col, positions):
+        total = [0]*len(positions)
+        for ind in range(len(positions)):
+            if ind != col:
+                otherQueen = positions[ind]
+                if otherQueen != None:
+                    total[otherQueen] += 1
+                    d = abs(col-ind)
+                    if otherQueen+d < len(positions):
+                        total[otherQueen+d] += 1
+                    if otherQueen-d >= 0:
+                        total[otherQueen-d] += 1
+        return total
 
     # col is the column for the queen of interest
     # row is the potential new row to move the queen to
@@ -83,6 +96,12 @@ class NQueens:
                 elif row == otherQueen or row+col == otherQueen+ind or row-col == otherQueen-ind:  # if it's in the same row or diagnol, don't need to check columns because we only place on queen per column
                     total += 1
         return total
+
+        for col in range(len(positions)):
+            _, conflict = self.minConflicts(col, positions)
+            if conflict > 0:
+                return False
+        return True
 
     def show_full_board(self, positions):
         """Show the full NxN board"""
@@ -115,6 +134,7 @@ def test():
 
     count = 0
     while count < 100:
+        print(count)
         count+=1
         start = time.time()
         queen = NQueens(64)
@@ -137,14 +157,14 @@ def test():
         queen = NQueens(150, True)
         betaTimesLong.append(time.time() - start)
 
-        print("---")
-        print(sum(timesShort)/len(timesShort), "avg for timesShort")
-        print(sum(timesMedium)/len(timesMedium), "avg for timesMedium")
-        print(sum(timesLong)/len(timesLong), "avg for timesLong")
-        print()
-        print(sum(betaTimesShort)/len(betaTimesShort), "avg for betaTimesShort")
-        print(sum(betaTimesMedium)/len(betaTimesMedium), "avg for betaTimesMedium")
-        print(sum(betaTimesLong)/len(betaTimesLong), "avg for betaTimesLong")
+    print("---")
+    print(sum(timesShort)/len(timesShort), "avg for timesShort")
+    print(sum(timesMedium)/len(timesMedium), "avg for timesMedium")
+    print(sum(timesLong)/len(timesLong), "avg for timesLong")
+    print()
+    print(sum(betaTimesShort)/len(betaTimesShort), "avg for betaTimesShort")
+    print(sum(betaTimesMedium)/len(betaTimesMedium), "avg for betaTimesMedium")
+    print(sum(betaTimesLong)/len(betaTimesLong), "avg for betaTimesLong")
 
 if __name__ == '__main__':
     test()
