@@ -7,44 +7,76 @@ class NQueens:
     """Generate all valid solutions for the n queens puzzle"""
     def __init__(self, size, beta=False):
         # Store the puzzle (problem) size and the number of valid solutions
-        self.totalConflicts = 0
         self.size = size
         self.beta = beta
-        self.positions = self.initializePositions(size)
+        self.rowConflicts=[0]*size
+        self.diag1Conflicts=[0]*(2*size-1)
+        self.diag2Conflicts=[0]*(2*size-1)
+        self.initializePositions()
         # self.show_full_board(self.positions)
+        # Use this if you want to see a breakdown of which functions are taking the most time
         self.solve()
 
     def solve(self):
-        iteration = 0
-        while self.totalConflicts > 0:
-            conflictsB = self.totalConflicts
-            for column in range(len(self.positions)):
-                if self.totalConflicts <= 0:
-                    break
-
-                row = self.positions[column]
-                rowToPut, minConflicts, change = self.minConflicts(column, self.positions)
+        maxIters = 100
+        currentIter = 0
+        success = False
+        while currentIter < maxIters:
+            column = self.findConflictingCol()
+            if column < 0:
+                success = True
+                break
+            row = self.positions[column]
+            rowToPut, minConflicts = self.minConflicts(column)
                 # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
-                self.totalConflicts += change
-                self.positions[column] = rowToPut
-            conflictsA = self.totalConflicts
+            self.remove_queen(self.positions[column], column)
+            self.add_queen(rowToPut, column)
+            currentIter+=1
 
-            iteration+=1
-            improvement = conflictsB-conflictsA
-            # print("Pass "+str(iteration)+" went from "+str(conflictsB)+" conflicts to "+str(conflictsA)+". An improvement of "+str(improvement))
+        if (not success):
+            self.restart()
 
-        if self.totalConflicts > 0:
-            print("Unable to solve problem")
+    def restart(self):
+        self.rowConflicts=[0]*self.size
+        self.diag1Conflicts=[0]*(2*self.size-1)
+        self.diag2Conflicts=[0]*(2*self.size-1)
+        self.initializePositions()
+        self.solve()
 
-    def initializePositions(self,size):
-        board = [None] * size
-        for column in range(size):
-            rowToPut, numConflicts, _ = self.minConflicts(column,board) # See if we can put the queen along the diagonal
-            board[column] = rowToPut
-            self.totalConflicts += numConflicts
-        return board
+    def findConflictingCol(self):
+    	num_vars_violated = 0
+    	vio_col = []
+    	max_vios = 0
+    	num_vios = 0
+    	for col in range(0, self.size):
+    		row=self.positions[col]
+    		num_vios = self.rowConflict(row, col)
+    		if 3 != num_vios: #three = zero violations
+    			vio_col.append(col)
+    	num_vars_violated = len(vio_col)
+    	if num_vars_violated == 0:
+    		return -1
+    	return random.choice(vio_col)
 
-    def minConflicts(self,col,positions):
+    def initializePositions(self):
+        self.positions = [None] * self.size
+        for column in range(self.size):
+            rowToPut, numConflicts = self.minConflicts(column) # See if we can put the queen along the diagonal
+            self.add_queen(rowToPut, column)
+
+    def add_queen(self, row, col):
+        self.positions[col] = row
+        self.rowConflicts[row] = self.rowConflicts[row]+1
+        self.diag1Conflicts[(self.size-1)+(col-row)] = self.diag1Conflicts[(self.size-1)+(col-row)]+1
+        self.diag2Conflicts[row+col] = self.diag2Conflicts[row+col]+1
+
+    def remove_queen(self, row, col):
+        self.positions[col] = 0
+        self.rowConflicts[row] = self.rowConflicts[row]-1
+        self.diag1Conflicts[(self.size-1)+(col-row)] = self.diag1Conflicts[(self.size-1)+(col-row)]-1
+        self.diag2Conflicts[row+col] = self.diag2Conflicts[row+col]-1
+
+    def minConflicts(self,col):
         """
             Takes in the column the queen is on, as well as the posititons of the queen's on the rest of the board,
             returns the best row the Queen can move to, the number of conflicts that the queen has moved into, and the difference in conflicts
@@ -52,12 +84,13 @@ class NQueens:
         """
         minn = float('inf')
         bestRow = -1
-        initRow = positions[col]
+        initRow = self.positions[col]
 
         candidates = []
-        colCon = self.colConflicts(col, positions)
-        for row in range(len(colCon)):
-            rowCons = colCon[row]
+        for row in range(self.size):
+            if row == initRow:
+                continue
+            rowCons = self.rowConflict(row, col)
             if rowCons > minn:
                 pass
             elif rowCons < minn:
@@ -66,55 +99,35 @@ class NQueens:
             else:
                 candidates.append(row)
         choice = random.choice(candidates)
-        beforeConflicts = colCon[initRow] if initRow is not None else float('inf')
-        changeInConflicts = (minn-beforeConflicts)
-        return choice, minn, changeInConflicts
+        return choice, minn
 
-    def colConflicts(self, col, positions):
-        total = [0]*len(positions)
-        for ind in range(len(positions)):
+    def rowConflict(self, row, col):
+         return self.rowConflicts[row]+self.diag1Conflicts[(self.size-1)+(col-row)]+self.diag2Conflicts[col+row]
+
+    def colConflicts(self, col):
+        total = [0]*self.size
+        for ind in range(self.size):
             if ind != col:
-                otherQueen = positions[ind]
+                otherQueen = self.positions[ind]
                 if otherQueen != None:
-                    total[otherQueen] += 1
+                    total[otherQueen] += 1 # Same row
                     d = abs(col-ind)
-                    if otherQueen+d < len(positions):
+                    if otherQueen+d < self.size: # diagonal
                         total[otherQueen+d] += 1
-                    if otherQueen-d >= 0:
+                    if otherQueen-d >= 0: # other diagonal
                         total[otherQueen-d] += 1
         return total
 
-    # col is the column for the queen of interest
-    # row is the potential new row to move the queen to
-    def numConflicts(self, row, col, positions):
-        total = 0
-        for ind in range(len(positions)):
-            if ind != col:
-                otherQueen = positions[ind]
-                if otherQueen == None:
-                    return total
-                elif row == otherQueen or row+col == otherQueen+ind or row-col == otherQueen-ind:  # if it's in the same row or diagnol, don't need to check columns because we only place on queen per column
-                    total += 1
-        return total
-
-        for col in range(len(positions)):
-            _, conflict = self.minConflicts(col, positions)
-            if conflict > 0:
-                return False
-        return True
-
-    def show_full_board(self, positions):
+    def show_full_board(self):
         """Show the full NxN board"""
         for row in range(self.size):
             line = ""
             for column in range(self.size):
-                if positions[column] == row:
+                if self.positions[column] == row:
                     line += "Q "
                 else:
                     line+=". "
             print(line)
-        print("Total conflicts: "+str(self.totalConflicts))
-        print("\n")
 
 def readText(fname):
     with open(fname) as f:
@@ -133,18 +146,18 @@ def test():
     betaTimesLong = []
 
     count = 0
-    while count < 100:
+    while count < 10:
         print(count)
         count+=1
         start = time.time()
-        queen = NQueens(64)
+        queen = NQueens(100)
         timesShort.append(time.time() - start)
 
         start = time.time()
         queen = NQueens(120)
         timesMedium.append(time.time() - start)
         start = time.time()
-        queen = NQueens(150)
+        queen = NQueens(2000)
         timesLong.append(time.time() - start)
 
         start = time.time()
@@ -154,7 +167,7 @@ def test():
         queen = NQueens(120, True)
         betaTimesMedium.append(time.time() - start)
         start = time.time()
-        queen = NQueens(150, True)
+        queen = NQueens(2000, True)
         betaTimesLong.append(time.time() - start)
 
     print("---")
