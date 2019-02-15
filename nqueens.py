@@ -1,5 +1,7 @@
 import random
 import time
+from datetime import timedelta
+
 """The n queens puzzle"""
 
 class NQueens:
@@ -8,11 +10,6 @@ class NQueens:
         # Store the puzzle (problem) size and the number of valid solutions
         self.size = size
         self.beta = beta
-<<<<<<< HEAD
-        self.positions = self.initializePositions(size)
-
-        # self.solve()
-=======
         self.rowConflicts=[0]*size
         self.diag1Conflicts=[0]*(2*size-1)
         self.diag2Conflicts=[0]*(2*size-1)
@@ -20,7 +17,6 @@ class NQueens:
         # self.show_full_board(self.positions)
         # Use this if you want to see a breakdown of which functions are taking the most time
         self.solve()
->>>>>>> 9e1eadc223582d1133426b4c72fe171aa2134c07
 
     def solve(self):
         maxIters = 100
@@ -115,30 +111,6 @@ class NQueens:
             if ind != col:
                 otherQueen = self.positions[ind]
                 if otherQueen != None:
-<<<<<<< HEAD
-                    total[otherQueen] += 1
-                    diagonal = abs(col-ind)
-                    if otherQueen+diagonal < len(positions):
-                        total[otherQueen+diagonal] += 1
-                    if otherQueen-diagonal >= 0:
-                        total[otherQueen-diagonal] += 1
-        return total
-
-    # col is the column for the queen of interest
-    # row is the potential new row to move the queen to
-    def numConflicts(self, row, col, positions):
-        total = 0
-        for ind in range(len(positions)):
-            if ind != col:
-                otherQueen = positions[ind]
-                if otherQueen == None:
-                    return total
-                elif row == otherQueen or row+col == otherQueen+ind or row-col == otherQueen-ind:  # if it's in the same row or diagnol, don't need to check columns because we only place on queen per column
-                    total += 1
-        return total
-
-    def show_full_board(self, positions):
-=======
                     total[otherQueen] += 1 # Same row
                     d = abs(col-ind)
                     if otherQueen+d < self.size: # diagonal
@@ -148,7 +120,6 @@ class NQueens:
         return total
 
     def show_full_board(self):
->>>>>>> 9e1eadc223582d1133426b4c72fe171aa2134c07
         """Show the full NxN board"""
         for row in range(self.size):
             line = ""
@@ -166,53 +137,54 @@ def readText(fname):
     return content
 
 
+
+if __name__ == '__main__':
+    sizes = readText('./nqueens.txt')
+    for size in sizes:
+        print("Starting Size: "+str(size))
+        start = time.time()
+        queen = NQueens(size)
+        timeTaken = time.time()-start
+        print("Finished Size: "+str(size)+"\n Time Taken: "+str(timedelta(seconds=timeTaken)))
+        print("---")
+
+
+
 def test():
     initialConflictsSmall = []
     initialConflictsMed = []
-    initialConflictsLarg = []
+    timesLong = []
 
     count = 0
-<<<<<<< HEAD
-    while count < 100:
-        count+=1
-        print("STARTING PASS "+str(count))
-        large = NQueens(1000000)
-        initialConflictsLarg.append(large.totalConflicts)
-        print("DONE PASS "+str(count))
-
-
-
-=======
     while count < 10:
-        print(count)
+        # print(count)
         count+=1
-        start = time.time()
-        queen = NQueens(100)
-        timesShort.append(time.time() - start)
+        # start = time.time()
+        # queen = NQueens(100)
+        # timesShort.append(time.time() - start)
 
+        # start = time.time()
+        # queen = NQueens(120)
+        # timesMedium.append(time.time() - start)
         start = time.time()
-        queen = NQueens(120)
-        timesMedium.append(time.time() - start)
-        start = time.time()
-        queen = NQueens(2000)
+        queen = NQueens(20000)
+        timeTaken = time.time()-start
+        print("Pass: "+str(count)+", time taken: "+str(timeTaken))
         timesLong.append(time.time() - start)
+        
 
-        start = time.time()
-        queen = NQueens(64, True)
-        betaTimesShort.append(time.time() - start)
-        start = time.time()
-        queen = NQueens(120, True)
-        betaTimesMedium.append(time.time() - start)
-        start = time.time()
-        queen = NQueens(2000, True)
-        betaTimesLong.append(time.time() - start)
->>>>>>> 9e1eadc223582d1133426b4c72fe171aa2134c07
+        # start = time.time()
+        # queen = NQueens(64, True)
+        # betaTimesShort.append(time.time() - start)
+        # start = time.time()
+        # queen = NQueens(120, True)
+        # betaTimesMedium.append(time.time() - start)
+        # start = time.time()
+        # queen = NQueens(20000, True)
+        # betaTimesLong.append(time.time() - start)
 
     print("---")
     # print(sum(initialConflictsSmall)/len(initialConflictsSmall), "avg initial conflicts small")
     # print(sum(initialConflictsMed)/len(initialConflictsMed), "avg initial conflicts medium")
-    print(sum(initialConflictsLarg)/len(initialConflictsLarg), "avg initial conflicts large")
+    print(sum(timesLong)/len(timesLong), "avg time large")
     
-
-if __name__ == '__main__':
-    test()
