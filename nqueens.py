@@ -10,10 +10,10 @@ class NQueens:
         # Store the puzzle (problem) size and the number of valid solutions
         self.size = size
         self.beta = beta
-        self.rowConflicts=[0]*size
-        self.diag1Conflicts=[0]*(2*size-1)
-        self.diag2Conflicts=[0]*(2*size-1)
-        self.initializePositions()
+        self.rowConflicts=[0]*size         # There are n rows, each queen needs to eventually reside in its own row. This list keeps track of queens that conflict on the same row.
+        self.diag1Conflicts=[0]*(2*size-1) # There are 2n-1 diagonals going in the /// direction, we have to account for possible conflicts on those diagonals
+        self.diag2Conflicts=[0]*(2*size-1) # There are 2n-1 diagonals going in the \\\ direction, we have to account for possible conflicts on those diagonals
+        self.initializePositions()          
         # self.show_full_board(self.positions)
         # Use this if you want to see a breakdown of which functions are taking the most time
         self.solve()
@@ -27,9 +27,8 @@ class NQueens:
             if column < 0:
                 success = True
                 break
-            row = self.positions[column]
-            rowToPut, minConflicts = self.minConflicts(column)
-                # print("Moved queen in column "+str(column)+" from row "+str(row) + " to row " + str(rowToPut)+". Num conflicts: "+str(self.totalConflicts))
+            rowToPut = self.minConflicts(column)
+            # print("Moved queen in column "+str(column)+" from row "+self.positions[column] + " to row " + str(rowToPut)+".")
             self.remove_queen(self.positions[column], column)
             self.add_queen(rowToPut, column)
             currentIter+=1
@@ -47,7 +46,6 @@ class NQueens:
     def findConflictingCol(self):
     	num_vars_violated = 0
     	vio_col = []
-    	max_vios = 0
     	num_vios = 0
     	for col in range(0, self.size):
     		row=self.positions[col]
@@ -62,7 +60,7 @@ class NQueens:
     def initializePositions(self):
         self.positions = [None] * self.size
         for column in range(self.size):
-            rowToPut, numConflicts = self.minConflicts(column) # See if we can put the queen along the diagonal
+            rowToPut = self.minConflicts(column) # See if we can put the queen along the diagonal
             self.add_queen(rowToPut, column)
 
     def add_queen(self, row, col):
@@ -84,26 +82,23 @@ class NQueens:
             before and after the move
         """
         minn = float('inf')
-        bestRow = -1
-        initRow = self.positions[col]
 
         candidates = []
         for row in range(self.size):
-            if row == initRow:
-                continue
             rowCons = self.rowConflict(row, col)
-            if rowCons > minn:
-                pass
-            elif rowCons < minn:
+            if rowCons < minn:
                 minn = rowCons
                 candidates = [row]
-            else:
+            elif rowCons == minn:
                 candidates.append(row)
-        choice = random.choice(candidates)
-        return choice, minn
+        choice = random.choice(candidates) # Out of all all the best possible options, pick one randomly. 
+        return choice
 
     def rowConflict(self, row, col):
-         return self.rowConflicts[row]+self.diag1Conflicts[(self.size-1)+(col-row)]+self.diag2Conflicts[col+row]
+        """
+            Given a row and a column, return how many current queen's could reach that square.
+        """
+        return self.rowConflicts[row]+self.diag1Conflicts[(self.size-1)+(col-row)]+self.diag2Conflicts[col+row]
 
     def colConflicts(self, col):
         total = [0]*self.size
@@ -136,17 +131,32 @@ def readText(fname):
     content = [int(x.strip()) for x in content]
     return content
 
+def writeOutput(listOfAnswers):
+    with open("nqueens_ouput.txt",'w') as out:
+        for answer in listOfAnswers:
+            line = str(answer)+"\n"
+            out.write(line)
 
-
-if __name__ == '__main__':
-    sizes = readText('./nqueens.txt')
-    for size in sizes:
-        print("Starting Size: "+str(size))
+def solveQueens(listOfSizes):
+    solved = []
+    for size in listOfSizes:
+        print("Starting Size: \t"+str(size))
         start = time.time()
         queen = NQueens(size)
+        solved.append(queen.positions)
         timeTaken = time.time()-start
-        print("Finished Size: "+str(size)+"\n Time Taken: "+str(timedelta(seconds=timeTaken)))
+        print("Finished Size: \t"+str(size)+"\nTime Taken: \t"+str(timedelta(seconds=timeTaken)))
         print("---")
+    return solved
+
+if __name__ == '__main__':
+    # queen = NQueens(8)
+    # queen.show_full_board()
+    # sizes = readText('./nqueens.txt')
+    # for size in sizes:
+    sizes = readText('./nqueens.txt')
+    solvedQueens = solveQueens(sizes)
+    writeOutput(solvedQueens)
 
 
 
