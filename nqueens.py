@@ -1,6 +1,5 @@
 import random
 import time
-import cProfile
 """The n queens puzzle"""
 
 class NQueens:
@@ -11,8 +10,8 @@ class NQueens:
         self.size = size
         self.beta = beta
         self.positions = self.initializePositions(size)
-        # self.show_full_board(self.positions)
-        self.solve()
+
+        # self.solve()
 
     def solve(self):
         iteration = 0
@@ -77,11 +76,11 @@ class NQueens:
                 otherQueen = positions[ind]
                 if otherQueen != None:
                     total[otherQueen] += 1
-                    d = abs(col-ind)
-                    if otherQueen+d < len(positions):
-                        total[otherQueen+d] += 1
-                    if otherQueen-d >= 0:
-                        total[otherQueen-d] += 1
+                    diagonal = abs(col-ind)
+                    if otherQueen+diagonal < len(positions):
+                        total[otherQueen+diagonal] += 1
+                    if otherQueen-diagonal >= 0:
+                        total[otherQueen-diagonal] += 1
         return total
 
     # col is the column for the queen of interest
@@ -96,12 +95,6 @@ class NQueens:
                 elif row == otherQueen or row+col == otherQueen+ind or row-col == otherQueen-ind:  # if it's in the same row or diagnol, don't need to check columns because we only place on queen per column
                     total += 1
         return total
-
-        for col in range(len(positions)):
-            _, conflict = self.minConflicts(col, positions)
-            if conflict > 0:
-                return False
-        return True
 
     def show_full_board(self, positions):
         """Show the full NxN board"""
@@ -124,47 +117,26 @@ def readText(fname):
 
 
 def test():
-    timesShort = []
-    timesMedium = []
-    timesLong = []
-
-    betaTimesShort = []
-    betaTimesMedium = []
-    betaTimesLong = []
+    initialConflictsSmall = []
+    initialConflictsMed = []
+    initialConflictsLarg = []
 
     count = 0
     while count < 100:
-        print(count)
         count+=1
-        start = time.time()
-        queen = NQueens(64)
-        timesShort.append(time.time() - start)
+        print("STARTING PASS "+str(count))
+        large = NQueens(1000000)
+        initialConflictsLarg.append(large.totalConflicts)
+        print("DONE PASS "+str(count))
 
-        start = time.time()
-        queen = NQueens(120)
-        timesMedium.append(time.time() - start)
-        start = time.time()
-        queen = NQueens(150)
-        timesLong.append(time.time() - start)
 
-        start = time.time()
-        queen = NQueens(64, True)
-        betaTimesShort.append(time.time() - start)
-        start = time.time()
-        queen = NQueens(120, True)
-        betaTimesMedium.append(time.time() - start)
-        start = time.time()
-        queen = NQueens(150, True)
-        betaTimesLong.append(time.time() - start)
+
 
     print("---")
-    print(sum(timesShort)/len(timesShort), "avg for timesShort")
-    print(sum(timesMedium)/len(timesMedium), "avg for timesMedium")
-    print(sum(timesLong)/len(timesLong), "avg for timesLong")
-    print()
-    print(sum(betaTimesShort)/len(betaTimesShort), "avg for betaTimesShort")
-    print(sum(betaTimesMedium)/len(betaTimesMedium), "avg for betaTimesMedium")
-    print(sum(betaTimesLong)/len(betaTimesLong), "avg for betaTimesLong")
+    # print(sum(initialConflictsSmall)/len(initialConflictsSmall), "avg initial conflicts small")
+    # print(sum(initialConflictsMed)/len(initialConflictsMed), "avg initial conflicts medium")
+    print(sum(initialConflictsLarg)/len(initialConflictsLarg), "avg initial conflicts large")
+    
 
 if __name__ == '__main__':
     test()
